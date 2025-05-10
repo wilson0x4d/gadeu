@@ -7,7 +7,7 @@ Quick Start
 Installation
 ------------
 
-You can install **gadeu** (가드) from `PyPI <https://pypi.org/project/gadeu/>`_ through usual means, such as ``pip``:
+You can install ``gadeu`` from `PyPI <https://pypi.org/project/gadeu/>`_ through usual means, such as ``pip``:
 
 .. code:: bash
 
@@ -58,7 +58,7 @@ Elsewhere in your project, you defined `FakeApi` and decorated at least one hand
             self.set_status(204)
 
 
-In the above example, ``FakeApi:put`` has been decorated with ``@authorization.apiKey`` which will force a check for a valid API Key. The expectations of that check are implemented via the ``ApiKeyAuthorizationHandler`` configured in the first few lines of the example. There are more options than are shown here, but this basic setup is enough for a server to check for a valid API Key.
+In the above example, ``FakeApi.put`` has been decorated with ``@authorization.apiKey`` which will force a check for a valid API Key. The expectations of that check are implemented via the ``ApiKeyAuthorizationHandler`` configured in the first few lines of the example. There are more options than are shown here, but this basic setup is enough for a server to check for a valid API Key.
 
 If you need to generate an encryption key there is a ``TokenUtil`` class that exposes a ``createSecretKey(...)`` method which you can use for this purpose, example:
 
