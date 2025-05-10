@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 from uuid import UUID
 import tornado
-import gadeu
+from gadeu import *
 
 
 _d = dict[int,str]()
@@ -61,7 +61,7 @@ class FakePropertyObj:
         """A datetime property"""
         return self.__bleh
     @bleh.setter
-    def bleh(self, value:int) -> None:
+    def bleh(self, value:datetime) -> None:
         self.__bleh = value
 
 
@@ -74,13 +74,15 @@ class FakeApi(tornado.web.RequestHandler):
         self.set_status(200)
         self.write(_d.get(id, ''))
 
-    @gadeu.authorization.apiKey
+    @authorization.apiKey
     async def put(self, id:str, name:str) -> None:
-        self.request.arguments.get('claims', {})
+        claims = self.request.arguments.get('claims', None)
+        if claims.get('can_edit', False) != True:
+            raise tornado.web.HTTPError(403)
         _d[id] = name
         self.set_status(204)
 
-    @gadeu.authorization.apiKey
+    @authorization.apiKey
     async def delete(self, name:str) -> None:
         id = None
         for k,v in _d.items():
@@ -90,7 +92,7 @@ class FakeApi(tornado.web.RequestHandler):
             _d.pop(id, None)
         self.set_status(200)
 
-    @gadeu.authorization.bearerToken
+    @authorization.bearerToken
     async def post(self) -> None:
         # NOTE: echo endpoint
         buf = self.request.body

@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (C) Shaun Wilson
 # SPDX-License-Identifier: MIT
 
+from typing import Any
 from gadeu import *
 import json
 from punit import *
@@ -18,9 +19,13 @@ async def putRequiresApiKey() -> None:
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
-    def validator(token:str, claims:dict[str,str]) -> bool:
+    def validator(token:str, claims:dict[str,Any]) -> bool:
+        # bookkeeping for test assertions
         nonlocal validatorCallCount
         validatorCallCount += 1
+        # globally, require `api_access` claim to be `true`
+        if claims.get('api_access', False) != True:
+            raise tornado.web.HTTPError(403)
         return True
 
     # configure an apiKey auth handler
@@ -51,7 +56,7 @@ async def putRequiresApiKey() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3456/api/v2/fakes/{id}/{name}', headers={
-                'X-API-Key': TokenUtil.createToken(apiKeySecret, {}, AuthorizationMethod.APIKEY)
+                'X-API-Key': TokenUtil.createToken(apiKeySecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 1
@@ -76,9 +81,13 @@ async def postRequiresBearerToken() -> None:
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
-    def validator(token:str, claims:dict[str,str]) -> bool:
+    def validator(token:str, claims:dict[str,Any]) -> bool:
+        # bookkeeping for test assertions
         nonlocal validatorCallCount
         validatorCallCount += 1
+        # globally, require `api_access` claim to be `true`
+        if claims.get('api_access', False) != True:
+            raise tornado.web.HTTPError(403)
         return True
 
     # configure a bearerToken auth handler
@@ -116,7 +125,7 @@ async def postRequiresBearerToken() -> None:
             response = await async_urllib3.request(
                 'POST', f'http://127.0.0.1:3457/api/v2/fakes',
                 headers={
-                    'Authorization': f'Bearer {TokenUtil.createToken(bearerTokenSecret, {}, AuthorizationMethod.BEARERTOKEN)}'
+                    'Authorization': f'Bearer {TokenUtil.createToken(bearerTokenSecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.BEARERTOKEN)}'
                 },
                 body=json.dumps({
                     'id': id,
@@ -145,9 +154,13 @@ async def verifyMixedAuth() -> None:
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
-    def validator(token:str, claims:dict[str,str]) -> bool:
+    def validator(token:str, claims:dict[str,Any]) -> bool:
+        # bookkeeping for test assertions
         nonlocal validatorCallCount
         validatorCallCount += 1
+        # globally, require `api_access` claim to be `true`
+        if claims.get('api_access', False) != True:
+            raise tornado.web.HTTPError(403)
         return True
 
     # configure a bearerToken auth handler
@@ -179,7 +192,7 @@ async def verifyMixedAuth() -> None:
             response = await async_urllib3.request(
                 'POST', f'http://127.0.0.1:3458/api/v2/fakes',
                 headers={
-                    'Authorization': f'Bearer {TokenUtil.createToken(bearerTokenSecret, {}, AuthorizationMethod.BEARERTOKEN)}'
+                    'Authorization': f'Bearer {TokenUtil.createToken(bearerTokenSecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.BEARERTOKEN)}'
                 },
                 body=json.dumps({
                     'id': '1',
@@ -190,7 +203,7 @@ async def verifyMixedAuth() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3458/api/v2/fakes/2/test2', headers={
-                'X-API-Key': TokenUtil.createToken(apiKeySecret, {}, AuthorizationMethod.APIKEY)
+                'X-API-Key': TokenUtil.createToken(apiKeySecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 2

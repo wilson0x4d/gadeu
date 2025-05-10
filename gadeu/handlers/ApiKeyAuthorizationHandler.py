@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import enum
-from typing import Callable
+from typing import Any, Callable
 import tornado
 
 from ..AuthorizationMethod import AuthorizationMethod
@@ -25,9 +25,9 @@ class ApiKeyAuthorizationHandler(AuthorizationHandler):
     __key:str
     __location:ApiKeyLocation
     __name:str
-    __validator:Callable[[str, dict[str,str]],bool]
+    __validator:Callable[[str, dict[str,Any]],bool]
 
-    def __init__(self, key:str, validator:Callable[[str, dict[str,str]],bool] = lambda t,c: True, location:ApiKeyLocation = ApiKeyLocation.HEADER, name:str = 'X-API-Key', claimsArgumentName:str = 'claims'):
+    def __init__(self, key:str, validator:Callable[[str, dict[str,Any]],bool] = lambda t,c: True, location:ApiKeyLocation = ApiKeyLocation.HEADER, name:str = 'X-API-Key', claimsArgumentName:str = 'claims'):
         super().__init__()
         self.__claimsArgumentName = claimsArgumentName
         self.__key = key
@@ -46,7 +46,7 @@ class ApiKeyAuthorizationHandler(AuthorizationHandler):
                 apiKey = requestHandler.get_argument(self.__name, None)
         if apiKey is None:
             raise tornado.web.HTTPError(403, 'No Authorization')
-        claims:dict[str,str] = None
+        claims:dict[str,Any] = None
         try:
             claims = TokenUtil.getTokenClaims(self.__key, apiKey, AuthorizationMethod.APIKEY)
             if self.__claimsArgumentName is not None:

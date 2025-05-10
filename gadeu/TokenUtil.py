@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import os
+from typing import Any
 import base58
 import hashlib
 import json
@@ -30,7 +31,7 @@ class TokenUtil:
         return base58.b58encode(key).decode()
 
     @classmethod
-    def __createApiKeyToken(cls, key:bytes, claims:dict[str,str]) -> str:
+    def __createApiKeyToken(cls, key:bytes, claims:dict[str,Any]) -> str:
         blockSizeBits = 128
         blockSizeBytes = int(blockSizeBits/8)
         iv = hashlib.shake_128(key, usedforsecurity=True).digest(blockSizeBytes)
@@ -43,7 +44,7 @@ class TokenUtil:
         return result[0:mid] + '.' + result[mid:]
 
     @classmethod
-    def __createBearerToken(cls, key:bytes, claims:dict[str,str]) -> str:
+    def __createBearerToken(cls, key:bytes, claims:dict[str,Any]) -> str:
         import jwcrypto.jwk as jwk
         import jwcrypto.jwt as jwt
         jkey = jwk.JWK(**json.loads(key))
@@ -54,7 +55,7 @@ class TokenUtil:
         return etoken.serialize()
 
     @classmethod
-    def __getApiKeyTokenClaims(cls, key:bytes, token:str) -> dict[str,str]:
+    def __getApiKeyTokenClaims(cls, key:bytes, token:str) -> dict[str,Any]:
         blockSizeBits = 128
         blockSizeBytes = int(blockSizeBits/8)
         buf = base58.b58decode(token.replace('.',''))
@@ -93,14 +94,14 @@ class TokenUtil:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
 
     @classmethod
-    def createToken(cls, secretKey:bytes|str, claims:dict[str,str], authorizationMethod:AuthorizationMethod) -> str:
+    def createToken(cls, secretKey:bytes|str, claims:dict[str,Any], authorizationMethod:AuthorizationMethod) -> str:
         """
         Creates a TOKEN required for authorization of applications and/or users.
 
         A TOKEN can be shared with the individual or organization it is created for.
 
         :param bytes|str secretKey: The SECRET KEY used for encryption (and signing) of the TOKEN.
-        :param dict[str,str] claims: The Claims to be stored within the token. Claims are always encrypted.
+        :param dict[str,Any] claims: The Claims to be stored within the token. Claims are always encrypted.
         :param authorizationMethod: The :py:class:`~gadeu.AuthorizationMethod` to create the TOKEN for. Tokens are generally not portable between security schemes.
         :return str: A token formatted as-expected for the specified Authorization Method. For example, for ``bearerToken`` auth the result is a serialized JWT.
         """
@@ -115,14 +116,14 @@ class TokenUtil:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
 
     @classmethod
-    def getTokenClaims(cls, secretKey:bytes|str, token:str, authorizationMethod:AuthorizationMethod) -> dict[str,str]:
+    def getTokenClaims(cls, secretKey:bytes|str, token:str, authorizationMethod:AuthorizationMethod) -> dict[str,Any]:
         """
         Given a SECRET KEY and a TOKEN, returns the Claims contained within the token.
 
         :param bytes|str secretKey: The SECRET KEY to use for token decryption (and signature verification).
         :param str token: The TOKEN to be decrypted and inspected for Claims.
         :param authorizationMethod: The :py:class:`~gadeu.AuthorizationMethod` the TOKEN was created for.
-        :return dict[str,str]: A dictionary containing the Claims as key-value pairs.
+        :return dict[str,Any]: A dictionary containing the Claims as key-value pairs.
         """
         if type(secretKey) is str:
             secretKey = base58.b58decode(secretKey.encode())

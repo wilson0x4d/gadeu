@@ -76,12 +76,12 @@ You can also use ``TokenUtil`` to generate API Keys using your secret key.
 
 ```python
 
-    # share this key securely with your business partners, developers,
+    # share this token securely with your business partners, developers,
     # testers, etc that need to authorize requests with a server.
     apiKey = TokenUtil.createToken(secretKey, {'app':'bob123'}, AuthorizationMethod.APIKEY)
 ```
 
-In the above example you can see a dictionary ``{'app':'bob123'}``, this is a "claims object" that gets encoded into the resulting token (``apiKey``).  Developers can access these claims via "validator functions" optionally set via the ``AuthorizationManager`` configured for the service.
+In the above example you can see a dictionary ``{'app':'bob123'}``, this is a "claims object" that gets encoded into the resulting token (``apiKey``). See the section below **Checking Claims** for more information on how they can be accessed.
 
 Currently, only ``apiKey`` and ``bearerToken`` security schemes are supported, with a plan to add others as they are requested, PR'd, or required for our own projects. Both ``apiKey`` and ``bearerToken`` tokens are encrypted, and unless you leak your secret keys the wider public should not be able to peek at the token contents (ie. the "claims" you've stored.) That said, it is NOT a good practice to store anything sensitive in a claim (such as keys, passwords, etc.)
 
@@ -99,20 +99,32 @@ Since we do not currently use these schemes there are not yet handlers for them,
 
 In the future there will be decorators to facilitate claims assertions.
 
-In the current implementation you can assert claims from a custom ``validator`` function, or even better check for claims within your handler methods. Example:
+In the current implementation you can check claims "globally" from a custom ``validator`` function, or "locally" within your handler methods. Example:
 
 ```python
 
+    # you configure an authorization handler
+    AuthorizationManager.setAuthorizationHandler(
+        AuthorizationMethod.APIKEY,
+        handlers.ApiKeyAuthorizationHandler(
+            key=apiKeySecret,
+            validator=lambda token,claims: claims.get('has_api_access', False) == True
+        )
+    )
+
+    # elsewhere, you decorate your services, and check claims
     class FakeApi(tornado.web.RequestHandler):    
 
         @authorization.apiKey
         async def put(self, id:str, name:str) -> None:
-            claims = self.request.arguments.get('claims', {})
-            assert claims.get('can_edit', False)
+            claims = self.request.arguments.get('claims', None)
+            if claims.get('can_edit', False) != True:
+                raise tornado.web.HTTPError(403)
             # do stuff
+
 ```
 
-Obviously this is a naive example, and you should probably ``HTTPError`` back to the client, but you get the idea. If ``claims`` is an argument name you already use (and therefore would be clobbered by ``gadeu``) then you can configure a custom argument name in your ``AuthorizationHandler``. Example:
+If ``claims`` is an argument name you already use (and therefore would be clobbered by ``gadeu``) then you can configure a custom argument name in your ``AuthorizationHandler``. Example:
 
 ```python
 
@@ -122,6 +134,28 @@ Obviously this is a naive example, and you should probably ``HTTPError`` back to
             key=secretKey,
             claimsArgumentName='my_epic_arg_name')
     )
+```
+
+Lastly, ``TokenUtil`` can be used directly against a token to check claims. This may be useful for non-standard scenarios (token passing over a websocket connection for example), or if you are building user-tools for managing and verifying tokens. Example:
+
+```python
+
+    secretKey = TokenUtil.createSecretKey(AuthorizationMethod.APIKEY)
+    token = TokenUtil.createToken(
+        secretKey, 
+        { 'id':123, 'ts':datetime.now().isoformat() },
+        AuthorizationMethod.APIKEY)
+    claims = TokenUtil.getTokenClaims(
+        secretKey,
+        token,
+        AuthorizationMethod.APIKEY)
+    print(claims)
+
+    # outputs:
+    #
+    # {'id': 123, 'ts': '2025-05-10T17:58:41.048820'}
+    #
+
 ```
 
 ## Contact
