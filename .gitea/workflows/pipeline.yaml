@@ -1,0 +1,37 @@
+name: "Build & Publish"
+run-name: ${{ gitea.actor }} (rn)
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+    - master
+    paths:
+    - 'gadeu/**'
+    - 'pyproject.toml'
+    - '!README.md'
+    - '!docs/**'
+    - '.gitea/workflows/pipeline.yaml'
+jobs:
+  publish:
+    name: "gadeu-pypi"
+    runs-on: builder-py313
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: "Configure Environment"
+      run: |
+        export SEMVER=$(conventional-semver)
+        echo "REGISTRY_NAMESPACE=wilson0x4d" >> "$GITHUB_ENV"
+        echo "SEMVER=$SEMVER" >> "$GITHUB_ENV"
+        echo "PYPI_REPO=${{ vars.PYPI_REPO }}" >> "$GITHUB_ENV"
+        .scripts/init-venv.sh
+    - name: "Execute Build-Time Tests"
+      run: |
+        cd '${{ gitea.workspace }}'
+        .scripts/run-tests.sh
+    - name: "Publish Packages"
+      run: |
+        cd '${{ gitea.workspace }}'
+        .scripts/publish-packages.sh
