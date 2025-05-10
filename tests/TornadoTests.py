@@ -1,19 +1,20 @@
 # SPDX-FileCopyrightText: Copyright (C) Shaun Wilson
 # SPDX-License-Identifier: MIT
 
+from gadeu import *
 import json
 from punit import *
 import tornado
 import urllib3
+
 from .fakes.FakeApi import FakeApi
-import gadeu
 
 @fact
 async def putRequiresApiKey() -> None:
     """Confirm that a basic tornado app can require an apiKey, when decorated and configured properly."""
 
     # generate a secret key for token generation/verification
-    apiKeySecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.APIKEY)
+    apiKeySecret = TokenUtil.createSecretKey(AuthorizationMethod.APIKEY)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -23,9 +24,9 @@ async def putRequiresApiKey() -> None:
         return True
 
     # configure an apiKey auth handler
-    gadeu.AuthorizationManager.setAuthorizationHandler(
-        gadeu.AuthorizationMethod.APIKEY,
-        gadeu.handlers.ApiKeyAuthorizationHandler(
+    AuthorizationManager.setAuthorizationHandler(
+        AuthorizationMethod.APIKEY,
+        handlers.ApiKeyAuthorizationHandler(
             key=apiKeySecret,
             validator=validator))
 
@@ -50,7 +51,7 @@ async def putRequiresApiKey() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3456/api/v2/fakes/{id}/{name}', headers={
-                'X-API-Key': gadeu.TokenUtil.createToken(apiKeySecret, {}, gadeu.AuthorizationMethod.APIKEY)
+                'X-API-Key': TokenUtil.createToken(apiKeySecret, {}, AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 1
@@ -71,7 +72,7 @@ async def postRequiresBearerToken() -> None:
     """Confirm that a basic tornado app can require a Bearer token, when decorated and configured properly."""
 
     # generate a secret key for token generation/verification
-    bearerTokenSecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
+    bearerTokenSecret = TokenUtil.createSecretKey(AuthorizationMethod.BEARERTOKEN)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -81,9 +82,9 @@ async def postRequiresBearerToken() -> None:
         return True
 
     # configure a bearerToken auth handler
-    gadeu.AuthorizationManager.setAuthorizationHandler(
-        gadeu.AuthorizationMethod.BEARERTOKEN,
-        gadeu.handlers.BearerTokenAuthorizationHandler(
+    AuthorizationManager.setAuthorizationHandler(
+        AuthorizationMethod.BEARERTOKEN,
+        handlers.BearerTokenAuthorizationHandler(
             key=bearerTokenSecret,
             validator=validator))
 
@@ -115,7 +116,7 @@ async def postRequiresBearerToken() -> None:
             response = await async_urllib3.request(
                 'POST', f'http://127.0.0.1:3457/api/v2/fakes',
                 headers={
-                    'Authorization': f'Bearer {gadeu.TokenUtil.createToken(bearerTokenSecret, {}, gadeu.AuthorizationMethod.BEARERTOKEN)}'
+                    'Authorization': f'Bearer {TokenUtil.createToken(bearerTokenSecret, {}, AuthorizationMethod.BEARERTOKEN)}'
                 },
                 body=json.dumps({
                     'id': id,
@@ -139,8 +140,8 @@ async def verifyMixedAuth() -> None:
     """Verify that a server can require a mixture of authentication methods."""
 
     # generate secret keys for token generation/verification
-    bearerTokenSecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
-    apiKeySecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.APIKEY)
+    bearerTokenSecret = TokenUtil.createSecretKey(AuthorizationMethod.BEARERTOKEN)
+    apiKeySecret = TokenUtil.createSecretKey(AuthorizationMethod.APIKEY)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -150,15 +151,15 @@ async def verifyMixedAuth() -> None:
         return True
 
     # configure a bearerToken auth handler
-    gadeu.AuthorizationManager.setAuthorizationHandler(
-        gadeu.AuthorizationMethod.BEARERTOKEN,
-        gadeu.handlers.BearerTokenAuthorizationHandler(
+    AuthorizationManager.setAuthorizationHandler(
+        AuthorizationMethod.BEARERTOKEN,
+        handlers.BearerTokenAuthorizationHandler(
             key=bearerTokenSecret,
             validator=validator))
     # configure an apiKey auth handler
-    gadeu.AuthorizationManager.setAuthorizationHandler(
-        gadeu.AuthorizationMethod.APIKEY,
-        gadeu.handlers.ApiKeyAuthorizationHandler(
+    AuthorizationManager.setAuthorizationHandler(
+        AuthorizationMethod.APIKEY,
+        handlers.ApiKeyAuthorizationHandler(
             key=apiKeySecret,
             validator=validator))
 
@@ -178,7 +179,7 @@ async def verifyMixedAuth() -> None:
             response = await async_urllib3.request(
                 'POST', f'http://127.0.0.1:3458/api/v2/fakes',
                 headers={
-                    'Authorization': f'Bearer {gadeu.TokenUtil.createToken(bearerTokenSecret, {}, gadeu.AuthorizationMethod.BEARERTOKEN)}'
+                    'Authorization': f'Bearer {TokenUtil.createToken(bearerTokenSecret, {}, AuthorizationMethod.BEARERTOKEN)}'
                 },
                 body=json.dumps({
                     'id': '1',
@@ -189,7 +190,7 @@ async def verifyMixedAuth() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3458/api/v2/fakes/2/test2', headers={
-                'X-API-Key': gadeu.TokenUtil.createToken(apiKeySecret, {}, gadeu.AuthorizationMethod.APIKEY)
+                'X-API-Key': TokenUtil.createToken(apiKeySecret, {}, AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 2
