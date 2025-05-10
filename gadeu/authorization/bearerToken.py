@@ -30,7 +30,7 @@ class bearerToken(object):
         return cast(METHOD, method)
     
     def __call__(self, instance:Any, *args:Any, **kwargs:Any) -> Any:
-        handler = AuthorizationManager.instance().getAuthorizationHandler(AuthorizationMethod.BEARERTOKEN)
+        handler = AuthorizationManager.getAuthorizationHandler(AuthorizationMethod.BEARERTOKEN)
         handler.authorize(instance)
         return self.__target(instance, *args, **kwargs)
 

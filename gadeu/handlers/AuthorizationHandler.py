@@ -25,4 +25,7 @@ class AuthorizationHandler(ABC):
 
     @abstractmethod
     def authorize(self, requestHandler:tornado.web.RequestHandler) -> None:
+        """
+        Method which performs authorization. The specifics of which are an implementation detail of each ``AuthorizationHandler`` subclass.
+        """
         pass

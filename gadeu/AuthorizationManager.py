@@ -6,24 +6,31 @@ from .AuthorizationMethod import AuthorizationMethod
 
 
 class AuthorizationManager:
+    """
+    Manages "Authorization Handlers" for "Authorization Methods".
+    """
 
-    __handlers:dict[AuthorizationMethod, AuthorizationHandler]
-    __instance:'AuthorizationManager' = None
-
-    def __init__(self):
-        self.__handlers = dict[AuthorizationMethod, AuthorizationHandler]()
+    __handlers:dict[AuthorizationMethod,AuthorizationHandler] = dict[AuthorizationMethod,AuthorizationHandler]()
 
     @classmethod
-    def instance(cls) -> 'AuthorizationManager':
-        if cls.__instance is None:
-            cls.__instance = AuthorizationManager()
-        return cls.__instance
-
-    def setAuthorizationHandler(self, authorizationMethod:AuthorizationMethod, handler:AuthorizationHandler|None) -> None:
-        if handler is None:
-            self.__handlers.pop(authorizationMethod, None)
+    def setAuthorizationHandler(cls, authorizationMethod:AuthorizationMethod, authorizationHandler:AuthorizationHandler|None) -> None:
+        """
+        Sets the :py:class:`~gadeu.handlers.AuthorizationHandler` for the specified :py:class:`~gadeu.AuthorizationMethod`.
+        
+        :param AuthorizationMethod authorizationMethod: The Authorization Method to set the handler for.
+        :param AuthorizationHandler authorizationHandler: The Authorization Handler to set for the specified method.
+        """
+        if authorizationHandler is None:
+            cls.__handlers.pop(authorizationMethod, None)
         else:
-            self.__handlers[authorizationMethod] = handler
+            cls.__handlers[authorizationMethod] = authorizationHandler
 
-    def getAuthorizationHandler(self, authorizationMethod:AuthorizationMethod) -> AuthorizationHandler|None:
-        return self.__handlers.get(authorizationMethod, None)
+    @classmethod
+    def getAuthorizationHandler(cls, authorizationMethod:AuthorizationMethod) -> AuthorizationHandler|None:
+        """
+        Gets the ``AuthorizationHandler`` for the specified ``AuthorizationMethod``, if any.
+
+        :param AuthorizationMethod authorizationMethod: The Authorization Method to set the handler for.
+        :returns: The currently assigned :py:class:`~gadeu.handlers.AuthorizationHandler`, if any. Otherwise ``None``.
+        """
+        return cls.__handlers.get(authorizationMethod, None)

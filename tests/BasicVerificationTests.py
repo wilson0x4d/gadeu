@@ -23,7 +23,7 @@ async def putRequiresApiKey() -> None:
         return True
 
     # configure an apiKey auth handler
-    gadeu.AuthorizationManager.instance().setAuthorizationHandler(
+    gadeu.AuthorizationManager.setAuthorizationHandler(
         gadeu.AuthorizationMethod.APIKEY,
         gadeu.handlers.ApiKeyAuthorizationHandler(
             key=apiKeySecret,
@@ -81,7 +81,7 @@ async def postRequiresBearerToken() -> None:
         return True
 
     # configure a bearerToken auth handler
-    gadeu.AuthorizationManager.instance().setAuthorizationHandler(
+    gadeu.AuthorizationManager.setAuthorizationHandler(
         gadeu.AuthorizationMethod.BEARERTOKEN,
         gadeu.handlers.BearerTokenAuthorizationHandler(
             key=bearerTokenSecret,
@@ -150,13 +150,13 @@ async def verifyMixedAuth() -> None:
         return True
 
     # configure a bearerToken auth handler
-    gadeu.AuthorizationManager.instance().setAuthorizationHandler(
+    gadeu.AuthorizationManager.setAuthorizationHandler(
         gadeu.AuthorizationMethod.BEARERTOKEN,
         gadeu.handlers.BearerTokenAuthorizationHandler(
             key=bearerTokenSecret,
             validator=validator))
     # configure an apiKey auth handler
-    gadeu.AuthorizationManager.instance().setAuthorizationHandler(
+    gadeu.AuthorizationManager.setAuthorizationHandler(
         gadeu.AuthorizationMethod.APIKEY,
         gadeu.handlers.ApiKeyAuthorizationHandler(
             key=apiKeySecret,

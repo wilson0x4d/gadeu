@@ -30,7 +30,7 @@ class apiKey(object):
         return cast(METHOD, method)
     
     def __call__(self, instance:Any, *args:Any, **kwargs:Any) -> Any:
-        handler = AuthorizationManager.instance().getAuthorizationHandler(AuthorizationMethod.APIKEY)
+        handler = AuthorizationManager.getAuthorizationHandler(AuthorizationMethod.APIKEY)
         handler.authorize(instance)
         return self.__target(instance, *args, **kwargs)
 

@@ -25,7 +25,7 @@ To use ``gadeu`` two things must be done; first you must register at least one a
     from .api.FakeApi import FakeApi
 
     # you configure an authorization handler
-    AuthorizationManager.instance().setAuthorizationHandler(
+    AuthorizationManager.setAuthorizationHandler(
         AuthorizationMethod.APIKEY,
         handlers.ApiKeyAuthorizationHandler(key=apiKeySecret)
     )
@@ -114,7 +114,7 @@ Obviously this is a naive example, and you should probably ``HTTPError`` back to
 
 .. code:: python
 
-    AuthorizationManager.instance().setAuthorizationHandler(
+    AuthorizationManager.setAuthorizationHandler(
         AuthorizationMethod.APIKEY,
         handlers.ApiKeyAuthorizationHandler(
             key=secretKey,
