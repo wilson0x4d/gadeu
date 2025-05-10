@@ -13,7 +13,7 @@ async def putRequiresApiKey() -> None:
     """Confirm that a basic tornado app can require an apiKey, when decorated and configured properly."""
 
     # generate a secret key for token generation/verification
-    apiKeySecret = gadeu.TokenUtil().createTokenKey(gadeu.AuthorizationMethod.APIKEY)
+    apiKeySecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.APIKEY)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -71,7 +71,7 @@ async def postRequiresBearerToken() -> None:
     """Confirm that a basic tornado app can require a Bearer token, when decorated and configured properly."""
 
     # generate a secret key for token generation/verification
-    bearerTokenSecret = gadeu.TokenUtil().createTokenKey(gadeu.AuthorizationMethod.BEARERTOKEN)
+    bearerTokenSecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -139,8 +139,8 @@ async def verifyMixedAuth() -> None:
     """Verify that a server can require a mixture of authentication methods."""
 
     # generate secret keys for token generation/verification
-    bearerTokenSecret = gadeu.TokenUtil().createTokenKey(gadeu.AuthorizationMethod.BEARERTOKEN)
-    apiKeySecret = gadeu.TokenUtil().createTokenKey(gadeu.AuthorizationMethod.APIKEY)
+    bearerTokenSecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
+    apiKeySecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.APIKEY)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0

@@ -5,7 +5,3 @@ AuthorizationMethod
 
 .. autoclass:: gadeu.AuthorizationMethod
    :members:
-
-   .. autoattribute:: APIKEY
-
-   .. autoattribute:: BEARERTOKEN

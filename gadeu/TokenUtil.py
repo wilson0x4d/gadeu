@@ -10,13 +10,14 @@ from cryptography.hazmat.primitives import padding
 
 from .AuthorizationMethod import AuthorizationMethod
 
+
 class TokenUtil:
-    """A class that can create and verify cryptographically secure tokens."""
+    """A class that can Create and Verify cryptographically secure tokens."""
 
     def __init__(self) -> None:
         pass
 
-    def __createAesKey(self) -> str:
+    def __createAesKey(self) -> str:        
         key = os.urandom(32)
         return base58.b58encode(key).decode()
 
@@ -67,7 +68,15 @@ class TokenUtil:
         stoken = jwt.JWT(key=jkey, jwt=etoken.claims)
         return json.loads(stoken.claims)
 
-    def createTokenKey(self, authorizationMethod:AuthorizationMethod) -> str:
+    def createSecretKey(self, authorizationMethod:AuthorizationMethod) -> str:
+        """
+        Creates a SECRET KEY required for encryption (and signing) of TOKENS.
+        
+        A SECRET KEY should not be shared, typically stored to a key vault for applications that need to securely access it for performing TOKEN verification.
+
+        :param authorizationMethod: The :py:class:`~gadeu.AuthorizationMethod` to create a SECRET KEY for. Keys are generally not portable between security schemes.
+        :return str: An encoded string that can be stored in JSON, XML, etc without additional encoding.
+        """
         match authorizationMethod:
             case AuthorizationMethod.APIKEY:
                 return self.__createAesKey()
@@ -76,24 +85,42 @@ class TokenUtil:
             case _:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
 
-    def createToken(self, key:bytes|str, claims:dict[str,str], authorizationMethod:AuthorizationMethod) -> str:
-        if type(key) is str:
-            key = base58.b58decode(key.encode())
+    def createToken(self, secretKey:bytes|str, claims:dict[str,str], authorizationMethod:AuthorizationMethod) -> str:
+        """
+        Creates a TOKEN required for authorization of applications and/or users.
+
+        A TOKEN can be shared with the individual or organization it is created for.
+
+        :param bytes|str secretKey: The SECRET KEY used for encryption (and signing) of the TOKEN.
+        :param dict[str,str] claims: The Claims to be stored within the token. Claims are always encrypted.
+        :param authorizationMethod: The :py:class:`~gadeu.AuthorizationMethod` to create the TOKEN for. Tokens are generally not portable between security schemes.
+        :return str: A token formatted as-expected for the specified Authorization Method. For example, for ``bearerToken`` auth the result is a serialized JWT.
+        """
+        if type(secretKey) is str:
+            secretKey = base58.b58decode(secretKey.encode())
         match authorizationMethod:
             case AuthorizationMethod.APIKEY:
-                return self.__createApiKeyToken(key, claims)
+                return self.__createApiKeyToken(secretKey, claims)
             case AuthorizationMethod.BEARERTOKEN:
-                return self.__createBearerToken(key, claims)
+                return self.__createBearerToken(secretKey, claims)
             case _:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
 
-    def getTokenClaims(self, key:bytes|str, token:str, authorizationMethod:AuthorizationMethod) -> dict[str,str]:
-        if type(key) is str:
-            key = base58.b58decode(key.encode())
+    def getTokenClaims(self, secretKey:bytes|str, token:str, authorizationMethod:AuthorizationMethod) -> dict[str,str]:
+        """
+        Given a SECRET KEY and a TOKEN, returns the Claims contained within the token.
+
+        :param bytes|str secretKey: The SECRET KEY to use for token decryption (and signature verification).
+        :param str token: The TOKEN to be decrypted and inspected for Claims.
+        :param authorizationMethod: The :py:class:`~gadeu.AuthorizationMethod` the TOKEN was created for.
+        :return dict[str,str]: A dictionary containing the Claims as key-value pairs.
+        """
+        if type(secretKey) is str:
+            secretKey = base58.b58decode(secretKey.encode())
         match authorizationMethod:
             case AuthorizationMethod.APIKEY:
-                return self.__getApiKeyTokenClaims(key, token)
+                return self.__getApiKeyTokenClaims(secretKey, token)
             case AuthorizationMethod.BEARERTOKEN:
-                return self.__getBearerTokenClaims(key, token)
+                return self.__getBearerTokenClaims(secretKey, token)
             case _:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
