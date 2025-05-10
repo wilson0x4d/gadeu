@@ -3,13 +3,16 @@
 
 **gadeu** (가드) is a decorative auth library for [Tornado](https://www.tornadoweb.org).
 
+This README is only a high-level introduction to **gadeu**. For more detailed documentation, please view the official docs at [https://gadeu.readthedocs.io](https://gadeu.readthedocs.io).
+
 ## Installation
 
 You can install ``gadeu`` from [PyPI](https://pypi.org/project/gadeu/) through usual means, such as ``pip``:
 
-.. code:: bash
+```bash
 
    pip install gadeu
+```
 
 ## Usage
 
@@ -56,7 +59,7 @@ Elsewhere in your project, you defined `FakeApi` and decorated at least one hand
             self.set_status(204)
 ```
 
-In the above example, ``FakeApi:put`` has been decorated with ``@authorization.apiKey`` which will force a check for a valid API Key. The expectations of that check are implemented via the ``ApiKeyAuthorizationHandler`` configured in the first few lines of the example. There are more options than are shown here, but this basic setup is enough for a server to check for a valid API Key.
+In the above example, ``FakeApi.put`` has been decorated with ``@authorization.apiKey`` which will force a check for a valid API Key. The expectations of that check are implemented via the ``ApiKeyAuthorizationHandler`` configured in the first few lines of the example. There are more options than are shown here, but this basic setup is enough for a server to check for a valid API Key.
 
 If you need to generate an encryption key there is a ``TokenUtil`` class that exposes a ``createTokenKey(...)`` method which you can use for this purpose, example:
 
@@ -123,4 +126,4 @@ Obviously this is a naive example, and you should probably ``HTTPError`` back to
 
 ## Contact
 
-You can reach me on `Discord <https://discordapp.com/users/307684202080501761>`_ or `open an Issue on Github <https://github.com/wilson0x4d/gadeu/issues/new/choose>`_.
+You can reach me on [Discord](https://discordapp.com/users/307684202080501761) or [open an Issue on Github](https://github.com/wilson0x4d/gadeu/issues/new/choose).
