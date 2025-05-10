@@ -69,7 +69,7 @@ If you need to generate an encryption key there is a ``TokenUtil`` class that ex
 
     # never share this key! it should get stored to a keyvault and
     # managed securely as part of your app settings.
-    secretKey = TokenUtil().createSecretKey(AuthorizationMethod.APIKEY)
+    secretKey = TokenUtil.createSecretKey(AuthorizationMethod.APIKEY)
 ```
 
 You can also use ``TokenUtil`` to generate API Keys using your secret key.
@@ -78,7 +78,7 @@ You can also use ``TokenUtil`` to generate API Keys using your secret key.
 
     # share this key securely with your business partners, developers,
     # testers, etc that need to authorize requests with a server.
-    apiKey = TokenUtil().createToken(secretKey, {'app':'bob123'}, AuthorizationMethod.APIKEY)
+    apiKey = TokenUtil.createToken(secretKey, {'app':'bob123'}, AuthorizationMethod.APIKEY)
 ```
 
 In the above example you can see a dictionary ``{'app':'bob123'}``, this is a "claims object" that gets encoded into the resulting token (``apiKey``).  Developers can access these claims via "validator functions" optionally set via the ``AuthorizationManager`` configured for the service.

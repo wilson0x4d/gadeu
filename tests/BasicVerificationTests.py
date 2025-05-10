@@ -13,7 +13,7 @@ async def putRequiresApiKey() -> None:
     """Confirm that a basic tornado app can require an apiKey, when decorated and configured properly."""
 
     # generate a secret key for token generation/verification
-    apiKeySecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.APIKEY)
+    apiKeySecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.APIKEY)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -50,7 +50,7 @@ async def putRequiresApiKey() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3456/api/v2/fakes/{id}/{name}', headers={
-                'X-API-Key': gadeu.TokenUtil().createToken(apiKeySecret, {}, gadeu.AuthorizationMethod.APIKEY)
+                'X-API-Key': gadeu.TokenUtil.createToken(apiKeySecret, {}, gadeu.AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 1
@@ -71,7 +71,7 @@ async def postRequiresBearerToken() -> None:
     """Confirm that a basic tornado app can require a Bearer token, when decorated and configured properly."""
 
     # generate a secret key for token generation/verification
-    bearerTokenSecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
+    bearerTokenSecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -115,7 +115,7 @@ async def postRequiresBearerToken() -> None:
             response = await async_urllib3.request(
                 'POST', f'http://127.0.0.1:3457/api/v2/fakes',
                 headers={
-                    'Authorization': f'Bearer {gadeu.TokenUtil().createToken(bearerTokenSecret, {}, gadeu.AuthorizationMethod.BEARERTOKEN)}'
+                    'Authorization': f'Bearer {gadeu.TokenUtil.createToken(bearerTokenSecret, {}, gadeu.AuthorizationMethod.BEARERTOKEN)}'
                 },
                 body=json.dumps({
                     'id': id,
@@ -139,8 +139,8 @@ async def verifyMixedAuth() -> None:
     """Verify that a server can require a mixture of authentication methods."""
 
     # generate secret keys for token generation/verification
-    bearerTokenSecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
-    apiKeySecret = gadeu.TokenUtil().createSecretKey(gadeu.AuthorizationMethod.APIKEY)
+    bearerTokenSecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.BEARERTOKEN)
+    apiKeySecret = gadeu.TokenUtil.createSecretKey(gadeu.AuthorizationMethod.APIKEY)
 
     # faux validator to confirm validator is (or is not) being called
     validatorCallCount = 0
@@ -178,7 +178,7 @@ async def verifyMixedAuth() -> None:
             response = await async_urllib3.request(
                 'POST', f'http://127.0.0.1:3458/api/v2/fakes',
                 headers={
-                    'Authorization': f'Bearer {gadeu.TokenUtil().createToken(bearerTokenSecret, {}, gadeu.AuthorizationMethod.BEARERTOKEN)}'
+                    'Authorization': f'Bearer {gadeu.TokenUtil.createToken(bearerTokenSecret, {}, gadeu.AuthorizationMethod.BEARERTOKEN)}'
                 },
                 body=json.dumps({
                     'id': '1',
@@ -189,7 +189,7 @@ async def verifyMixedAuth() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3458/api/v2/fakes/2/test2', headers={
-                'X-API-Key': gadeu.TokenUtil().createToken(apiKeySecret, {}, gadeu.AuthorizationMethod.APIKEY)
+                'X-API-Key': gadeu.TokenUtil.createToken(apiKeySecret, {}, gadeu.AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 2

@@ -30,7 +30,7 @@ class BearerTokenAuthorizationHandler(AuthorizationHandler):
         token:str = bearer.replace(self.__name, '').strip()
         claims:dict[str,str] = None
         try:
-            claims = TokenUtil().getTokenClaims(self.__key, token, AuthorizationMethod.BEARERTOKEN)
+            claims = TokenUtil.getTokenClaims(self.__key, token, AuthorizationMethod.BEARERTOKEN)
             if self.__claimsArgumentName is not None:
                 requestHandler.request.arguments[self.__claimsArgumentName] = claims
         except:

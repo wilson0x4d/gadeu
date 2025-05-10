@@ -48,7 +48,7 @@ class ApiKeyAuthorizationHandler(AuthorizationHandler):
             raise tornado.web.HTTPError(403, 'No Authorization')
         claims:dict[str,str] = None
         try:
-            claims = TokenUtil().getTokenClaims(self.__key, apiKey, AuthorizationMethod.APIKEY)
+            claims = TokenUtil.getTokenClaims(self.__key, apiKey, AuthorizationMethod.APIKEY)
             if self.__claimsArgumentName is not None:
                 requestHandler.request.arguments[self.__claimsArgumentName] = claims
         except:

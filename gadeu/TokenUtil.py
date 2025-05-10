@@ -14,20 +14,23 @@ from .AuthorizationMethod import AuthorizationMethod
 class TokenUtil:
     """A class that can Create and Verify cryptographically secure tokens."""
 
-    def __init__(self) -> None:
+    def __init__(cls) -> None:
         pass
 
-    def __createAesKey(self) -> str:        
+    @classmethod
+    def __createAesKey(cls) -> str:        
         key = os.urandom(32)
         return base58.b58encode(key).decode()
 
-    def __createJwk(self) -> str:
+    @classmethod
+    def __createJwk(cls) -> str:
         import jwcrypto.jwk as jwk
         jkey = jwk.JWK(generate='oct', size=256)
         key:str = jkey.export()
         return base58.b58encode(key).decode()
 
-    def __createApiKeyToken(self, key:bytes, claims:dict[str,str]) -> str:
+    @classmethod
+    def __createApiKeyToken(cls, key:bytes, claims:dict[str,str]) -> str:
         blockSizeBits = 128
         blockSizeBytes = int(blockSizeBits/8)
         iv = hashlib.shake_128(key, usedforsecurity=True).digest(blockSizeBytes)
@@ -39,7 +42,8 @@ class TokenUtil:
         mid = int(len(result)/2)
         return result[0:mid] + '.' + result[mid:]
 
-    def __createBearerToken(self, key:bytes, claims:dict[str,str]) -> str:
+    @classmethod
+    def __createBearerToken(cls, key:bytes, claims:dict[str,str]) -> str:
         import jwcrypto.jwk as jwk
         import jwcrypto.jwt as jwt
         jkey = jwk.JWK(**json.loads(key))
@@ -49,7 +53,8 @@ class TokenUtil:
         etoken.make_encrypted_token(jkey)
         return etoken.serialize()
 
-    def __getApiKeyTokenClaims(self, key:bytes, token:str) -> dict[str,str]:
+    @classmethod
+    def __getApiKeyTokenClaims(cls, key:bytes, token:str) -> dict[str,str]:
         blockSizeBits = 128
         blockSizeBytes = int(blockSizeBits/8)
         buf = base58.b58decode(token.replace('.',''))
@@ -60,7 +65,8 @@ class TokenUtil:
         result = unpadder.update(output) + unpadder.finalize()
         return json.loads(result)
 
-    def __getBearerTokenClaims(self, key:bytes, token:str) -> str:
+    @classmethod
+    def __getBearerTokenClaims(cls, key:bytes, token:str) -> str:
         import jwcrypto.jwk as jwk
         import jwcrypto.jwt as jwt
         jkey = jwk.JWK(**json.loads(key))
@@ -68,7 +74,8 @@ class TokenUtil:
         stoken = jwt.JWT(key=jkey, jwt=etoken.claims)
         return json.loads(stoken.claims)
 
-    def createSecretKey(self, authorizationMethod:AuthorizationMethod) -> str:
+    @classmethod
+    def createSecretKey(cls, authorizationMethod:AuthorizationMethod) -> str:
         """
         Creates a SECRET KEY required for encryption (and signing) of TOKENS.
         
@@ -79,13 +86,14 @@ class TokenUtil:
         """
         match authorizationMethod:
             case AuthorizationMethod.APIKEY:
-                return self.__createAesKey()
+                return cls.__createAesKey()
             case AuthorizationMethod.BEARERTOKEN:
-                return self.__createJwk()
+                return cls.__createJwk()
             case _:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
 
-    def createToken(self, secretKey:bytes|str, claims:dict[str,str], authorizationMethod:AuthorizationMethod) -> str:
+    @classmethod
+    def createToken(cls, secretKey:bytes|str, claims:dict[str,str], authorizationMethod:AuthorizationMethod) -> str:
         """
         Creates a TOKEN required for authorization of applications and/or users.
 
@@ -100,13 +108,14 @@ class TokenUtil:
             secretKey = base58.b58decode(secretKey.encode())
         match authorizationMethod:
             case AuthorizationMethod.APIKEY:
-                return self.__createApiKeyToken(secretKey, claims)
+                return cls.__createApiKeyToken(secretKey, claims)
             case AuthorizationMethod.BEARERTOKEN:
-                return self.__createBearerToken(secretKey, claims)
+                return cls.__createBearerToken(secretKey, claims)
             case _:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
 
-    def getTokenClaims(self, secretKey:bytes|str, token:str, authorizationMethod:AuthorizationMethod) -> dict[str,str]:
+    @classmethod
+    def getTokenClaims(cls, secretKey:bytes|str, token:str, authorizationMethod:AuthorizationMethod) -> dict[str,str]:
         """
         Given a SECRET KEY and a TOKEN, returns the Claims contained within the token.
 
@@ -119,8 +128,8 @@ class TokenUtil:
             secretKey = base58.b58decode(secretKey.encode())
         match authorizationMethod:
             case AuthorizationMethod.APIKEY:
-                return self.__getApiKeyTokenClaims(secretKey, token)
+                return cls.__getApiKeyTokenClaims(secretKey, token)
             case AuthorizationMethod.BEARERTOKEN:
-                return self.__getBearerTokenClaims(secretKey, token)
+                return cls.__getBearerTokenClaims(secretKey, token)
             case _:
                 raise Exception(f'Unsupported authorizationMethod "{authorizationMethod}"')
