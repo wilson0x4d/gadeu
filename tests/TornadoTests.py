@@ -56,7 +56,7 @@ async def putRequiresApiKey() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3456/api/v2/fakes/{id}/{name}', headers={
-                'X-API-Key': TokenUtil.createToken(apiKeySecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.APIKEY)
+                'X-Api-Key': TokenUtil.createToken(apiKeySecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 1
@@ -203,7 +203,7 @@ async def verifyMixedAuth() -> None:
         # assert 'PUT' method succeeds with an apiKey, and that our validator was called
         async with urllib3.AsyncPoolManager() as async_urllib3:
             response = await async_urllib3.request('PUT', f'http://127.0.0.1:3458/api/v2/fakes/2/test2', headers={
-                'X-API-Key': TokenUtil.createToken(apiKeySecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.APIKEY)
+                'X-Api-Key': TokenUtil.createToken(apiKeySecret, { 'api_access':True, 'can_edit':True }, AuthorizationMethod.APIKEY)
             })
             assert response.status == 204
         assert validatorCallCount == 2

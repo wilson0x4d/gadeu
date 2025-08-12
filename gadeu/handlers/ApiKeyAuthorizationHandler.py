@@ -27,7 +27,7 @@ class ApiKeyAuthorizationHandler(AuthorizationHandler):
     __name:str
     __validator:Callable[[str, dict[str,Any]],bool]
 
-    def __init__(self, key:str, validator:Callable[[str, dict[str,Any]],bool] = lambda t,c: True, location:ApiKeyLocation = ApiKeyLocation.HEADER, name:str = 'X-API-Key', claimsArgumentName:str = 'claims'):
+    def __init__(self, key:str, validator:Callable[[str, dict[str,Any]],bool] = lambda t,c: True, location:ApiKeyLocation = ApiKeyLocation.HEADER, name:str = 'X-Api-Key', claimsArgumentName:str = 'claims'):
         super().__init__()
         self.__claimsArgumentName = claimsArgumentName
         self.__key = key
